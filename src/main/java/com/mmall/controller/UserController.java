@@ -3,6 +3,7 @@ package com.mmall.controller;
 import com.mmall.model.SysUser;
 import com.mmall.service.SysUserService;
 import com.mmall.util.MD5Util;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Controller
+@Slf4j
 public class UserController {
 
     @Resource
@@ -46,12 +48,20 @@ public class UserController {
         } else if (sysUser.getStatus() != 1) {
             errorMsg = "用户已被冻结，请联系管理员";
         } else {
-            // login success
             request.getSession().setAttribute("user", sysUser);
-            if (StringUtils.isNotBlank(ret)) {
-                response.sendRedirect(ret);
+            if (username.equals("SJGCS1@163.com")) {
+                request.getSession().setAttribute("username", sysUser.getUsername());
+                response.sendRedirect("/record/upload.page");
             } else {
-                response.sendRedirect("/admin/index.page"); //TODO
+                ////原有保持不动
+                // login success
+
+                if (StringUtils.isNotBlank(ret)) {
+                    response.sendRedirect(ret);
+                } else {
+                    response.sendRedirect("/admin/index.page"); //TODO
+                }
+                /////
             }
         }
 

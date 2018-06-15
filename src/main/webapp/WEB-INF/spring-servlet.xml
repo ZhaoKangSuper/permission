@@ -39,4 +39,10 @@
         <property name="suffix" value=".jsp" />
     </bean>
 
+    <!-- 配置文件上传 -->
+    <bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 配置文件上传的最大体积 -->
+        <property name="maxUploadSize" value="102400000"></property>
+    </bean>
+
 </beans>

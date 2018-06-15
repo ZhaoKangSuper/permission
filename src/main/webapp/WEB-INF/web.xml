@@ -97,6 +97,7 @@
     <filter-name>aclControlFilter</filter-name>
     <url-pattern>/sys/*</url-pattern>
     <url-pattern>/admin/*</url-pattern>
+    <!--<url-pattern>/record/*</url-pattern>-->
   </filter-mapping>
 
   <welcome-file-list>

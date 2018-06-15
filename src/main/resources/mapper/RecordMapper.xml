@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mmall.dao.RecordMapper" >
+  <resultMap id="BaseResultMap" type="com.mmall.model.Record" >
+    <id column="Id" property="id" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="user1" property="user1" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="pic" property="pic" jdbcType="VARCHAR" />
+    <result column="discription1" property="discription1" jdbcType="VARCHAR" />
+    <result column="user2" property="user2" jdbcType="VARCHAR" />
+    <result column="action" property="action" jdbcType="INTEGER" />
+    <result column="discription2" property="discription2" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    Id, type, user1, title, pic, discription1, user2, action, discription2
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from record
+    where Id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from record
+    where Id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mmall.model.Record" >
+    insert into record (Id, type, user1, 
+      title, pic, discription1, 
+      user2, action, discription2
+      )
+    values (#{id,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{user1,jdbcType=VARCHAR}, 
+      #{title,jdbcType=VARCHAR}, #{pic,jdbcType=VARCHAR}, #{discription1,jdbcType=VARCHAR}, 
+      #{user2,jdbcType=VARCHAR}, #{action,jdbcType=INTEGER}, #{discription2,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mmall.model.Record" >
+    insert into record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        Id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="user1 != null" >
+        user1,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="pic != null" >
+        pic,
+      </if>
+      <if test="discription1 != null" >
+        discription1,
+      </if>
+      <if test="user2 != null" >
+        user2,
+      </if>
+      <if test="action != null" >
+        action,
+      </if>
+      <if test="discription2 != null" >
+        discription2,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="user1 != null" >
+        #{user1,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="pic != null" >
+        #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="discription1 != null" >
+        #{discription1,jdbcType=VARCHAR},
+      </if>
+      <if test="user2 != null" >
+        #{user2,jdbcType=VARCHAR},
+      </if>
+      <if test="action != null" >
+        #{action,jdbcType=INTEGER},
+      </if>
+      <if test="discription2 != null" >
+        #{discription2,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mmall.model.Record" >
+    update record
+    <set >
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="user1 != null" >
+        user1 = #{user1,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="pic != null" >
+        pic = #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="discription1 != null" >
+        discription1 = #{discription1,jdbcType=VARCHAR},
+      </if>
+      <if test="user2 != null" >
+        user2 = #{user2,jdbcType=VARCHAR},
+      </if>
+      <if test="action != null" >
+        action = #{action,jdbcType=INTEGER},
+      </if>
+      <if test="discription2 != null" >
+        discription2 = #{discription2,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where Id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mmall.model.Record" >
+    update record
+    set type = #{type,jdbcType=INTEGER},
+      user1 = #{user1,jdbcType=VARCHAR},
+      title = #{title,jdbcType=VARCHAR},
+      pic = #{pic,jdbcType=VARCHAR},
+      discription1 = #{discription1,jdbcType=VARCHAR},
+      user2 = #{user2,jdbcType=VARCHAR},
+      action = #{action,jdbcType=INTEGER},
+      discription2 = #{discription2,jdbcType=VARCHAR}
+    where Id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectAllRecord" resultMap="BaseResultMap">
+    select *
+    from record
+  </select>
+  <select id="selectAllRecordWhileActionNotNull" resultMap="BaseResultMap">
+    select *
+    from record
+    where action = 0
+  </select>
+  <select id="selectByPic" resultMap="BaseResultMap">
+    select *
+    from record
+    where pic = #{pic}
+  </select>
+  <select id="selectByAction" resultMap="BaseResultMap">
+    select *
+    from record
+    where action = 1
+  </select>
+</mapper>
