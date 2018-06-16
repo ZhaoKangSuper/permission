@@ -1,15 +1,24 @@
 package com.mmall.controller;
 
+import com.mmall.dao.SysAclMapper;
+import com.mmall.dao.SysRoleAclMapper;
+import com.mmall.dao.SysRoleUserMapper;
 import com.mmall.model.Record;
+import com.mmall.model.SysAcl;
+import com.mmall.model.SysUser;
 import com.mmall.service.RecordService;
 import com.mmall.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -24,6 +33,15 @@ import java.util.Map;
 @Slf4j
 public class RecordController {
 
+    @Resource
+    SysRoleUserMapper sysRoleUserMapper;
+
+    @Resource
+    SysRoleAclMapper sysRoleAclMapper;
+
+    @Resource
+    SysAclMapper sysAclMapper;
+
     @Autowired
     private RecordService recordService;
 
@@ -37,7 +55,8 @@ public class RecordController {
                            @RequestParam(value = "title") String title,
                            @RequestParam(value = "description") String description,
                            @RequestParam(value = "imgFile") MultipartFile file) {
-        int type = (int) request.getSession().getAttribute("flag");
+        int type = (Integer) request.getSession().getAttribute("flag");
+        log.info("****************" + type);
         int action = 0;
 //        String title = request.getParameter("title");
         log.info("-------------"+title);
@@ -50,9 +69,13 @@ public class RecordController {
         return "upload";
     }
 
-    @RequestMapping(value = "/check", method = RequestMethod.GET)
-    public String check (Map<String,Object> map) {
-        List<Record> recordList = recordService.selectAllRecord();
+    @RequestMapping(value = "/check")
+    public String check (Map<String,Object> map,HttpServletRequest request, HttpServletResponse response) {
+        int type = (int)request.getSession().getAttribute("flag");
+        log.info("????????????"+type);
+ //       List<Record> recordList = recordService.selectAllRecord();
+        List<Record> recordList = recordService.selectByType(type, 0);
+        log.info("????????????"+type);
         map.put("records", recordList);
         return "check";
     }
@@ -114,8 +137,10 @@ public class RecordController {
     }
 
     @RequestMapping(value = "/download")
-    public String download (Map<String,Object> map) {
-        List<Record> recordList = recordService.selectByAction();
+    public String download (Map<String,Object> map, HttpServletRequest request, HttpServletResponse response) {
+ //       List<Record> recordList = recordService.selectByAction();
+        int type = (int)request.getSession().getAttribute("flag");
+        List<Record> recordList = recordService.selectByAction(type);
         map.put("records", recordList);
         return "download";
     }
@@ -142,5 +167,77 @@ public class RecordController {
         }else {
                 return "redirect:/record/upload";
             }
+    }
+
+    @RequestMapping("/register")
+    public void register(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        SysUser sysUser = (SysUser)request.getSession().getAttribute("user");
+        List<SysAcl> aclList = aclController(sysUser);
+        for (SysAcl sysAcl: aclList
+                ) {
+            if (sysAcl.getUrl().contains("register")) {
+                request.getSession().setAttribute("flag", 1);
+                if (sysAcl.getUrl().contains("upload")) {
+                    response.sendRedirect("/record/upload");
+                } else if (sysAcl.getUrl().contains("check")) {
+                    response.sendRedirect("/record/check");
+                } else {
+                    response.sendRedirect("/record/download");
+                }
+            }
+        }
+        for (SysAcl sysAcl: aclList
+                ) {
+                if (sysAcl.getUrl().contains("upload")) {
+                    response.sendRedirect("/record/upload");
+                } else if (sysAcl.getUrl().contains("check")) {
+                    response.sendRedirect("/record/check");
+                } else {
+                    response.sendRedirect("/record/download");
+                }
+        }
+    }
+
+    @RequestMapping("/grant")
+    public void grant(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        SysUser sysUser = (SysUser)request.getSession().getAttribute("user");
+        List<SysAcl> aclList = aclController(sysUser);
+
+        for (SysAcl sysAcl: aclList
+                ) {
+            if (sysAcl.getUrl().contains("grant")) {
+                request.getSession().setAttribute("flag", 0);
+                if (sysAcl.getUrl().contains("upload")) {
+                    response.sendRedirect("/record/upload");
+                } else if (sysAcl.getUrl().contains("check")) {
+                    response.sendRedirect("/record/check");
+                } else {
+                    response.sendRedirect("/record/download");
+                }
+            }
+        }
+        for (SysAcl sysAcl: aclList
+                ) {
+
+                if (sysAcl.getUrl().contains("upload")) {
+                    response.sendRedirect("/record/upload");
+                } else if (sysAcl.getUrl().contains("check")) {
+                    response.sendRedirect("/record/check");
+                } else {
+                    response.sendRedirect("/record/download");
+                }
+        }
+    }
+
+    public List<SysAcl> aclController(SysUser sysUser) {
+        // userId - roleId - aclId - acl
+        //获取acl
+        int userId = sysUser.getId();
+        log.info("============="+userId);
+        List<Integer> roleIdList = sysRoleUserMapper.getRoleIdListByUserId(userId);
+        log.info("============="+roleIdList.get(0));
+        List<Integer> aclId = sysRoleAclMapper.getAclIdListByRoleIdList(roleIdList);
+        List<SysAcl> aclList = sysAclMapper.getByIdList(aclId);
+        return aclList;
     }
 }
