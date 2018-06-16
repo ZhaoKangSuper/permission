@@ -37,7 +37,7 @@ public class RecordController {
                            @RequestParam(value = "title") String title,
                            @RequestParam(value = "description") String description,
                            @RequestParam(value = "imgFile") MultipartFile file) {
-        int type = 0;
+        int type = (int) request.getSession().getAttribute("flag");
         int action = 0;
 //        String title = request.getParameter("title");
         log.info("-------------"+title);
@@ -50,7 +50,7 @@ public class RecordController {
         return "upload";
     }
 
-    @RequestMapping(value = "/check")
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
     public String check (Map<String,Object> map) {
         List<Record> recordList = recordService.selectAllRecord();
         map.put("records", recordList);
@@ -61,7 +61,7 @@ public class RecordController {
     public String doCheck(HttpServletRequest request, HttpServletResponse response) {
         String radio = request.getParameter("radio");
         String description2 = request.getParameter("description");
-        String user2 =(String)request.getSession().getAttribute("user");
+        String user2 = (String)request.getSession().getAttribute("username");
         log.info("----"+radio );
         // 剪出
         if(radio !=null ) {
