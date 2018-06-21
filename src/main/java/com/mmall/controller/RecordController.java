@@ -58,12 +58,7 @@ public class RecordController {
         int type = (Integer) request.getSession().getAttribute("flag");
         log.info("****************" + type);
         int action = 0;
-//        String title = request.getParameter("title");
-        log.info("-------------"+title);
-//        String description = request.getParameter("description");
-        log.info("-------------"+description);
         String username = (String)request.getSession().getAttribute("username");
-        log.info(type + username + title + description + file + action);
         recordService.doUpload(type, username, title, description, file, action);
         log.info("------------------");
         return "upload";
@@ -72,10 +67,7 @@ public class RecordController {
     @RequestMapping(value = "/check")
     public String check (Map<String,Object> map,HttpServletRequest request, HttpServletResponse response) {
         int type = (int)request.getSession().getAttribute("flag");
-        log.info("????????????"+type);
- //       List<Record> recordList = recordService.selectAllRecord();
         List<Record> recordList = recordService.selectByType(type, 0);
-        log.info("????????????"+type);
         map.put("records", recordList);
         return "check";
     }
@@ -240,4 +232,15 @@ public class RecordController {
         List<SysAcl> aclList = sysAclMapper.getByIdList(aclId);
         return aclList;
     }
+
+    //查看自己操作记录
+    @RequestMapping(value = "/operation")
+    public String operation (Map<String,Object> map,HttpServletRequest request, HttpServletResponse response) {
+        String user = (String)request.getSession().getAttribute("username");
+//        String user = "SJS1";
+        List<Record> recordList = recordService.selectByUser(user);
+        map.put("records", recordList);
+        return "operation";
+    }
+
 }
