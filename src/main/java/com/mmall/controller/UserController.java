@@ -1,5 +1,9 @@
 package com.mmall.controller;
 
+import com.mmall.dao.SysAclMapper;
+import com.mmall.dao.SysRoleAclMapper;
+import com.mmall.dao.SysRoleUserMapper;
+import com.mmall.model.SysAcl;
 import com.mmall.model.SysUser;
 import com.mmall.service.SysUserService;
 import com.mmall.util.MD5Util;
@@ -13,10 +17,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @Slf4j
 public class UserController {
+
+    @Resource
+    SysRoleUserMapper sysRoleUserMapper;
+
+    @Resource
+    SysRoleAclMapper sysRoleAclMapper;
+
+    @Resource
+    SysAclMapper sysAclMapper;
 
     @Resource
     private SysUserService sysUserService;
@@ -49,20 +63,42 @@ public class UserController {
             errorMsg = "用户已被冻结，请联系管理员";
         } else {
             request.getSession().setAttribute("user", sysUser);
-            if (username.equals("SJGCS1@163.com")) {
-                request.getSession().setAttribute("username", sysUser.getUsername());
-                response.sendRedirect("/record/upload.page");
-            } else {
-                ////原有保持不动
-                // login success
 
+            if(sysUser.getUsername().equals("Admin")) {
+                ////原有保持不动
+                // login success //管理员
                 if (StringUtils.isNotBlank(ret)) {
                     response.sendRedirect(ret);
                 } else {
                     response.sendRedirect("/admin/index.page"); //TODO
                 }
-                /////
+            } else {
+                request.getSession().setAttribute("username", sysUser.getUsername());
+                List<SysAcl> aclList = aclController(sysUser);
+                for (SysAcl sysAcl: aclList
+                     ) {
+                    if (sysAcl.getUrl().contains("grant/upload")) {
+                        request.getSession().setAttribute("flag", 0);
+                        response.sendRedirect("/record/upload");
+                    } else if (sysAcl.getUrl().contains("grant/check")) {
+                        request.getSession().setAttribute("flag", 0);
+                        response.sendRedirect("/record/check");
+                    } else if (sysAcl.getUrl().contains("grant/download")) {
+                        request.getSession().setAttribute("flag", 0);
+                        response.sendRedirect("/record/download");
+                    } else if (sysAcl.getUrl().contains("register/upload")) {
+                        request.getSession().setAttribute("flag", 1);
+                        response.sendRedirect("/record/upload");
+                    } else if (sysAcl.getUrl().contains("register/check")) {
+                        request.getSession().setAttribute("flag", 1);
+                        response.sendRedirect("/record/check");
+                    } else if (sysAcl.getUrl().contains("register/download")) {
+                        request.getSession().setAttribute("flag", 1);
+                        response.sendRedirect("/record/download");
+                    }
+                }
             }
+
         }
 
         request.setAttribute("error", errorMsg);
@@ -72,5 +108,17 @@ public class UserController {
         }
         String path = "signin.jsp";
         request.getRequestDispatcher(path).forward(request, response);
+    }
+
+    public List<SysAcl> aclController(SysUser sysUser) {
+        // userId - roleId - aclId - acl
+        //获取acl
+        int userId = sysUser.getId();
+        log.info("============="+userId);
+        List<Integer> roleIdList = sysRoleUserMapper.getRoleIdListByUserId(userId);
+        log.info("============="+roleIdList.get(0));
+        List<Integer> aclId = sysRoleAclMapper.getAclIdListByRoleIdList(roleIdList);
+        List<SysAcl> aclList = sysAclMapper.getByIdList(aclId);
+        return aclList;
     }
 }
